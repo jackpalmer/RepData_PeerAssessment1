@@ -11,6 +11,18 @@ library(ggplot2)
 ## Warning: package 'ggplot2' was built under R version 3.1.3
 ```
 
+```r
+library(lattice)
+```
+
+```
+## Warning: package 'lattice' was built under R version 3.1.3
+```
+
+```r
+options(scipen = 999)
+```
+
 Load the data
 
 
@@ -52,29 +64,17 @@ m + geom_histogram(binwidth = 1000) + xlab("Steps") + ylab("Frequency")
 ## Warning: Removed 8 rows containing non-finite values (stat_bin).
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+![](PA1_template_files/figure-html/histogram of steps by day-1.png)<!-- -->
 
 Calculate and report the mean and median of the total number of steps taken per day.
 
 
 ```r
-mean_steps_by_day <- mean(steps_by_day$x, na.rm = T)
+mean_steps_by_day <- mean(steps_by_day$steps, na.rm = T)
+median_steps_by_day <- median(steps_by_day$steps, na.rm = T)
 ```
 
-```
-## Warning in mean.default(steps_by_day$x, na.rm = T): argument is not numeric
-## or logical: returning NA
-```
-
-```r
-median_steps_by_day <- median(steps_by_day$x, na.rm = T)
-```
-
-```
-## Warning in is.na(x): is.na() applied to non-(list or vector) of type 'NULL'
-```
-
-The mean number of steps taken each day is NA. The median number of steps taken each day is .
+The mean number of steps taken each day is 10766.1886792. The median number of steps taken each day is 10765.
 
 ## What is the average daily activity pattern?
 
@@ -87,7 +87,7 @@ colnames(mean_steps_by_interval) <- c("interval","steps")
 plot(mean_steps_by_interval$interval,mean_steps_by_interval$steps, type="l", xlab= "Time Interval", ylab= "Average Number of Steps Taken")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+![](PA1_template_files/figure-html/time series plot of average steps taken by interval-1.png)<!-- -->
 
 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
@@ -120,7 +120,6 @@ data_cleaned <- merge(data,mean_steps_by_interval,by.x = c("interval"),by.y = c(
 data_cleaned$steps <- ifelse(!is.na(data_cleaned$steps.x),data_cleaned$steps.x,data_cleaned$steps.y)
 ```
 
-
 Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
 Aggregate the steps by day to calculate the total number of steps taken by day.
@@ -131,22 +130,26 @@ steps_by_day_cleaned <- aggregate(data_cleaned$steps, by = list(data_cleaned$dat
 colnames(steps_by_day_cleaned) <- c("date","steps")
 ```
 
+Calculate the difference in total number of steps
 
 
 ```r
-m <- ggplot(data=steps_by_day_cleaned, aes(x=steps)) 
-m + geom_histogram(binwidth = 1000) + xlab("Steps") + ylab("Frequency")
+step_difference <- sum(data_cleaned$steps) - sum(data$steps, na.rm = T) 
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
+Imputing the missing data results in an additional 86129.509434 steps.
 
-Calculate and report the mean and median of the total number of steps taken per day.
+Calculate and report the mean and median of the total number of steps taken per day for the cleaned data set.
 
 
 ```r
 mean_steps_by_day_cleaned <- mean(steps_by_day_cleaned$steps, na.rm = T)
 median_steps_by_day_cleaned <- median(steps_by_day_cleaned$steps, na.rm = T)
+mean_steps_differential <- mean_steps_by_day - mean_steps_by_day_cleaned
+median_steps_differential <- median_steps_by_day - median_steps_by_day_cleaned
 ```
+
+The difference in the mean number of steps is 0. The difference in the median number of steps is -1.1886792.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -157,7 +160,13 @@ Create a new factor variable in the dataset with two levels - "weekday" and "wee
 data$dow <- ifelse(weekdays(data$date) == "Saturday" | weekdays(data$date) == "Sunday", "Weekend", "Weekday")
 ```
 
-Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
+Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). 
 
 
+```r
+mean_steps_by_interval_dow <- aggregate(data$steps, by = list(data$interval,data$dow), mean, na.rm = T)
+colnames(mean_steps_by_interval_dow) <- c("interval","dow","steps")
+xyplot(steps~interval | factor(dow), data=mean_steps_by_interval_dow,type = "l", xlab = "Interval", ylab = "Number of steps",layout=c(1,2))
+```
 
+![](PA1_template_files/figure-html/time series panel plot-1.png)<!-- -->
