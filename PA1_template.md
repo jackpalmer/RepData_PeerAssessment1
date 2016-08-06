@@ -29,14 +29,6 @@ Load the data
 ```r
 temp <- tempfile()
 download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip",temp)
-```
-
-```
-## Warning in download.file("https://d396qusza40orc.cloudfront.net/repdata
-## %2Fdata%2Factivity.zip", : downloaded length 53559 != reported length 53559
-```
-
-```r
 data <- read.csv(unz(temp, "activity.csv"))
 unlink(temp)
 data$date <- as.Date(data$date)
@@ -129,6 +121,16 @@ Aggregate the steps by day to calculate the total number of steps taken by day.
 steps_by_day_cleaned <- aggregate(data_cleaned$steps, by = list(data_cleaned$date), sum)
 colnames(steps_by_day_cleaned) <- c("date","steps")
 ```
+
+Make histogram
+
+
+```r
+m <- ggplot(data=steps_by_day_cleaned, aes(x=steps)) 
+m + geom_histogram(binwidth = 1000) + xlab("Steps") + ylab("Frequency")
+```
+
+![](PA1_template_files/figure-html/histogram of steps by day with cleaned data-1.png)<!-- -->
 
 Calculate the difference in total number of steps
 

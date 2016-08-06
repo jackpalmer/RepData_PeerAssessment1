@@ -95,6 +95,13 @@ steps_by_day_cleaned <- aggregate(data_cleaned$steps, by = list(data_cleaned$dat
 colnames(steps_by_day_cleaned) <- c("date","steps")
 ```
 
+Make histogram
+
+```{r histogram of steps by day with cleaned data}
+m <- ggplot(data=steps_by_day_cleaned, aes(x=steps)) 
+m + geom_histogram(binwidth = 1000) + xlab("Steps") + ylab("Frequency")
+```
+
 Calculate the difference in total number of steps
 
 ```{r calculate step difference}
